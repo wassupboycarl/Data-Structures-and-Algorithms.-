@@ -1,0 +1,177 @@
+MIDTERM EXAM
+
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+class Set {
+public:
+    int setNumber;
+    int player_1;
+    int player_2;
+
+    Set(int num, int p1Score, int p2Score) {
+        setNumber = num;
+        player_1 = p1Score;
+        player_2 = p2Score;
+    }
+
+    void displaySet() {
+        cout << "Set " << setNumber << ": Player 1 = " << player_1 << " "<<" | Player 2 = " << player_2 << endl;
+    }
+};
+
+class TableTennisScorer {
+private:
+    vector<Set> sets;
+    int player1Wins = 0;
+    int player2Wins = 0;
+
+    bool checkForWinner() {
+        if (player1Wins >= 3) {
+            cout << "\nPlayer 1 is the winner in the best of 5" << endl;
+            return true;
+        } else if (player2Wins >= 3) {
+            cout << "\nPlayer 2 is the winner in the best of 5" << endl;
+            return true;
+        }
+        return false;
+    }
+
+public:
+    bool doesSetExist(int setNumber) {
+        for (auto &set : sets) {
+            if (set.setNumber == setNumber) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void createSet(int setNumber, int player_1, int player_2) {
+        if (doesSetExist(setNumber)) {
+            cout << "Set " << setNumber << " already exists. Create another set." << endl;
+        } else {
+            sets.push_back(Set(setNumber, player_1, player_2));
+            if (player_1 > player_2) {
+                player1Wins++;
+            } else if (player_2 > player_1) {
+                player2Wins++;
+            }
+            cout << "Set " << setNumber << " is finished." << endl;
+            if (checkForWinner()) {
+                exit(0);
+            }
+        }
+    }
+
+    void updateSet(int setNumber, int player_1, int player_2) {
+        bool found = false;
+        for (auto &set : sets) {
+            if (set.setNumber == setNumber) {
+                if (set.player_1 > set.player_2) {
+                    player1Wins--;
+                } else if (set.player_2 > set.player_1) {
+                    player2Wins--;
+                }
+                set.player_1 = player_1;
+                set.player_2 = player_2;
+                if (player_1 > player_2) {
+                    player1Wins++;
+                } else if (player_2 > player_1) {
+                    player2Wins++;
+                }
+                cout << "Set " << setNumber << " updated successfully." << endl;
+                found = true;
+                if (checkForWinner()) {
+                    exit(0);
+                }
+                break;
+            }
+        }
+        if (!found) {
+            cout << "Set " << setNumber << " not found." << endl;
+        }
+    }
+
+    void deleteSet(int setNumber) {
+        for (auto it = sets.begin(); it != sets.end(); ++it) {
+            if (it->setNumber == setNumber) {
+                if (it->player_1 > it->player_2) {
+                    player1Wins--;
+                } else if (it->player_2 > it->player_1) {
+                    player2Wins--;
+                }
+                sets.erase(it);
+                cout << "Set " << setNumber << " deleted successfully." << endl;
+                return;
+            }
+        }
+        cout << "Set " << setNumber << " not found." << endl;
+    }
+
+    void displaySets() {
+        if (sets.empty()) {
+            cout << "There is no game set." << endl;
+        } else {
+            cout << "Current sets and scores:" << endl;
+            for (auto &set : sets) {
+                set.displaySet();
+            }
+        }
+    }
+};
+
+int main() {
+    TableTennisScorer scorer;
+    int opt, setNumber, player_1, player_2;
+
+    do {
+        cout << "\n--- MSEUF Paddlers Score board ---" << endl;
+        cout << "\t1. Create new set" << endl;
+        cout << "\t2. Update existing set" << endl;
+        cout << "\t3. Delete a set" << endl;
+        cout << "\t4. Display all sets" << endl;
+        cout << "\tSelect from option 1-5: " ;
+        cin >> opt;
+
+        switch (opt) {
+            case 1:
+                cout << "\nEnter set number: ";
+                cin >> setNumber;
+                cout << "Enter Player 1 score: ";
+                cin >> player_1;
+                cout << "Enter Player 2 score: ";
+                cin >> player_2;
+                scorer.createSet(setNumber, player_1, player_2);
+                break;
+
+            case 2:
+                cout << "\nEnter set number to update: ";
+                cin >> setNumber;
+                cout << "Enter new Player 1 score: ";
+                cin >> player_1;
+                cout << "Enter new Player 2 score: ";
+                cin >> player_2;
+                scorer.updateSet(setNumber, player_1, player_2);
+                break;
+
+            case 3:
+                cout << "\nEnter set number to delete: ";
+                cin >> setNumber;
+                scorer.deleteSet(setNumber);
+                break;
+
+            case 4:
+                scorer.displaySets();
+                break;
+
+            default:
+                cout << "Input not valid" << endl;
+        }
+    } while (opt != 5);
+
+    return 0;
+}

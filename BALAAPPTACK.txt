@@ -1,0 +1,97 @@
+STACK
+#include <iostream>
+#include <stack>
+#include <cctype>
+#include <sstream>
+using namespace std;
+
+int precedence(char op) {
+    if (op == '+' || op == '-')
+        return 1;
+    if (op == '*' || op == '/')
+        return 2;
+    return 0;
+}
+
+int applyOperator(int x, int y, char op) {
+    switch (op) {
+        case '+': return x + y;
+        case '-': return x - y;
+        case '*': return x * y;
+        case '/': return x / y;
+    }
+    return 0;
+}
+
+string infixToPostfix(string expr) {
+    stack<char> ops;
+    stringstream output;
+
+    for (size_t i = 0; i < expr.length(); i++) {
+        if (expr[i] == ' ')
+            continue;
+
+        if (isdigit(expr[i])) {
+            while (i < expr.length() && isdigit(expr[i])) {
+                output << expr[i];
+                i++;
+            }
+            output << ' ';
+            i--;
+        } else if (expr[i] == '(') {
+            ops.push(expr[i]);
+        } else if (expr[i] == ')') {
+            while (!ops.empty() && ops.top() != '(') {
+                output << ops.top() << ' ';
+                ops.pop();
+            }
+            ops.pop();
+        } else {
+            while (!ops.empty() && precedence(ops.top()) >= precedence(expr[i])) {
+                output << ops.top() << ' ';
+                ops.pop();
+            }
+            ops.push(expr[i]);
+        }
+    }
+
+    while (!ops.empty()) {
+        output << ops.top() << ' ';
+        ops.pop();
+    }
+
+    return output.str();
+}
+
+int evaluatePostfix(string postfix) {
+    stack<int> nums;
+    stringstream ss(postfix);
+    string token;
+
+    while (ss >> token) {
+        if (isdigit(token[0])) {
+            nums.push(stoi(token));
+        } else {
+            int y = nums.top(); nums.pop();
+            int x = nums.top(); nums.pop();
+            nums.push(applyOperator(x, y, token[0]));
+        }
+    }
+
+    return nums.top();
+}
+
+int calculator(string expr) {
+    string postfix = infixToPostfix(expr);
+    return evaluatePostfix(postfix);
+}
+
+int main() {
+    string expression;
+    cout << "Enter an expression: ";
+    getline(cin, expression);
+    int result = calculator(expression);
+    cout << "Result: " << result << endl;
+
+    return 0;
+}
